@@ -211,6 +211,13 @@ of a fixed location is recommended. -->
       <version>${version.jackson}</version>
     </dependency>
 
+    <!-- Reflection lib -->
+    <dependency>
+      <groupId>ar.com.kfgodel</groupId>
+      <artifactId>diamond</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
     <!-- Logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
