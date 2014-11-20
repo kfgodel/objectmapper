@@ -73,7 +73,7 @@ public class FieldDisassembler implements ObjectDisassembler {
     }
 
     private DisassemblyInstruction createInstructionFor(TypeField instanceField) {
-        Class<?> valueType = instanceField.type().rawClasses().get();
+        Class<?> valueType = instanceField.type().nativeTypes().get();
         Function<Object, Object> disassemblyTransformer = valueTransformer.getTransformerFor(valueType);
 
         FieldGetterInstruction getterInstruction = FieldGetterInstruction.create(instanceField);
