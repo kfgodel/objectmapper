@@ -11,16 +11,16 @@ import java.util.List;
  */
 public class TypeMapDescriptionImpl implements TypeMapDescription {
 
-    private List<PropertyEntryDescription> propertyList;
+    private PropertyEntryDescription[] propertyList;
 
     public static TypeMapDescriptionImpl create(List<PropertyEntryDescription> propertyList) {
         TypeMapDescriptionImpl description = new TypeMapDescriptionImpl();
-        description.propertyList = propertyList;
+        description.propertyList = propertyList.toArray(new PropertyEntryDescription[propertyList.size()]);
         return description;
     }
 
     @Override
-    public List<PropertyEntryDescription> getProperties() {
+    public PropertyEntryDescription[] getProperties() {
         return propertyList;
     }
 }

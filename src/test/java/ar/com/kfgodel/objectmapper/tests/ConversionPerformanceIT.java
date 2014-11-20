@@ -44,11 +44,11 @@ public class ConversionPerformanceIT extends JavaSpec<TestContext> {
                 it("native mapper",()->{
                     runTestsOn(TypicalObjectMapper.create());
                 });
-                it("jackson mapper",()->{
-                    runTestsOn(JacksonMapper.create());
-                });
                 it("implementation mapper",()->{
                     runTestsOn(DiamondMapper.create());
+                });
+                it("jackson mapper",()->{
+                    runTestsOn(JacksonMapper.create());
                 });
             });
 

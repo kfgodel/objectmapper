@@ -25,8 +25,9 @@ public class DiamondMapper implements TypeMapper {
         }
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
         TypeMapDescription mapDescription = getDescriptionFor(instance.getClass());
-        List<PropertyEntryDescription> properties = mapDescription.getProperties();
-        for (PropertyEntryDescription property : properties) {
+        PropertyEntryDescription[] properties = mapDescription.getProperties();
+        for (int i = 0; i < properties.length; i++) {
+            PropertyEntryDescription property = properties[i];
             map.put(property.getName(), property.getValueFrom(instance));
         }
         return map;
