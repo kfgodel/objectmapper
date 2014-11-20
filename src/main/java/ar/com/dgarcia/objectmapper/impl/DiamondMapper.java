@@ -1,13 +1,16 @@
 package ar.com.dgarcia.objectmapper.impl;
 
 import ar.com.dgarcia.objectmapper.api.PropertyEntryDescription;
+import ar.com.dgarcia.objectmapper.api.MapSafeTypeConverter;
 import ar.com.dgarcia.objectmapper.api.TypeMapDescription;
 import ar.com.dgarcia.objectmapper.api.TypeMapper;
+import ar.com.dgarcia.objectmapper.impl.converters.*;
 import ar.com.kfgodel.diamond.api.Diamond;
 import ar.com.kfgodel.diamond.api.fields.TypeField;
 import ar.com.kfgodel.diamond.api.types.TypeInstance;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -17,6 +20,7 @@ import java.util.stream.Collectors;
 public class DiamondMapper implements TypeMapper {
 
     private Map<Class<?>, TypeMapDescription> descriptionPerType = new WeakHashMap<>();
+    private MapSafeTypeConverter converter;
 
     @Override
     public Map<String, Object> toMap(Object instance) {
@@ -56,76 +60,12 @@ public class DiamondMapper implements TypeMapper {
         TypeInstance fieldType = instanceField.type();
         DirectEntryDescription directDescription = DirectEntryDescription.create(instanceField);
         Class<?> instanceClass = fieldType.rawClasses().get();
-        if(instanceClass.isPrimitive()){
+        Function<Object, Object> specificConverter = converter.getSpecificConverterFor(instanceClass);
+        if(specificConverter == NoConverter.INSTANCE){
+            // This is an optimization to avoid conversion if not needed
             return directDescription;
         }
-        if(Number.class.isAssignableFrom(instanceClass)){
-            return directDescription;
-        }
-        if(CharSequence.class.isAssignableFrom(instanceClass)){
-            return directDescription;
-        }
-        if(instanceClass.getComponentType() != null){
-            return ArrayEntryDescription.create(directDescription, this);
-        }
-        if(Collection.class.isAssignableFrom(instanceClass)){
-            return CollectionEntryDescription.create(directDescription, this);
-        }
-        if(Map.class.isAssignableFrom(instanceClass)){
-            return MapEntryDescription.create(directDescription, this);
-        }
-        return ObjectEntryDescription.create(directDescription, this);
-    }
-
-    public Object recursiveConversionFrom(Object instance) {
-        if(instance == null){
-            return null;
-        }
-        Class<?> instanceClass = instance.getClass();
-        if(instanceClass.isPrimitive()){
-            return instance;
-        }
-        if(Number.class.isAssignableFrom(instanceClass)){
-            return instance;
-        }
-        if(CharSequence.class.isAssignableFrom(instanceClass)){
-            return instance;
-        }
-        if(instanceClass.getComponentType() != null){
-            return arrayAsList((Object[])instance);
-        }
-        if(Collection.class.isAssignableFrom(instanceClass)){
-            return collectionAsList((Collection) instance);
-        }
-        if(Map.class.isAssignableFrom(instanceClass)){
-            return translateMap((Map) instance);
-        }
-        return toMap(instance);
-    }
-
-    private Object translateMap(Map<String, Object> map) {
-        Map<String, Object> translatedMap = new LinkedHashMap<>();
-        Set<Map.Entry<String, Object>> sourceEntries = map.entrySet();
-        for (Map.Entry<String, Object> sourceEntry : sourceEntries) {
-            translatedMap.put(sourceEntry.getKey(), recursiveConversionFrom(sourceEntry.getValue()));
-        }
-        return translatedMap;
-    }
-
-    private Object collectionAsList(Collection collection) {
-        ArrayList<Object> objects = new ArrayList<>();
-        for (Object element : collection) {
-            objects.add(recursiveConversionFrom(element));
-        }
-        return objects;
-    }
-
-    private Object arrayAsList(Object[] array) {
-        ArrayList<Object> objects = new ArrayList<>(array.length);
-        for (Object element : array) {
-            objects.add(recursiveConversionFrom(element));
-        }
-        return objects;
+        return ConvertedEntryDescription.create(directDescription, specificConverter);
     }
 
     @Override
@@ -134,8 +74,9 @@ public class DiamondMapper implements TypeMapper {
     }
 
     public static DiamondMapper create() {
-        DiamondMapper diamondMapper = new DiamondMapper();
-        return diamondMapper;
+        DiamondMapper mapper = new DiamondMapper();
+        mapper.converter = MapSafeTypeConverterImpl.create(mapper);
+        return mapper;
     }
 
 }
