@@ -1,5 +1,6 @@
-package ar.com.dgarcia.objectmapper.api;
+package ar.com.dgarcia.objectmapper.impl;
 
+import ar.com.dgarcia.objectmapper.api.TypeMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Map;
