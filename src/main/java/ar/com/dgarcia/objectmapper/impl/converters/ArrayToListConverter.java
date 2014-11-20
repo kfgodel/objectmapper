@@ -17,8 +17,10 @@ public class ArrayToListConverter implements Function<Object, Object> {
     public Object apply(Object value) {
         Object[] asArray = (Object[]) value;
         ArrayList<Object> objects = new ArrayList<>(asArray.length);
-        for (Object element : asArray) {
-            objects.add(converter.convertForMap(element));
+        for (int i = 0; i < asArray.length; i++) {
+            Object element = asArray[i];
+            Object converted = converter.convertForMap(element);
+            objects.add(converted);
         }
         return objects;
     }
