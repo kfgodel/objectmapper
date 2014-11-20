@@ -3,9 +3,9 @@ package ar.com.kfgodel.objectmapper.tests;
 import ar.com.dgarcia.javaspec.api.JavaSpec;
 import ar.com.dgarcia.javaspec.api.JavaSpecRunner;
 import ar.com.dgarcia.javaspec.api.TestContext;
-import ar.com.dgarcia.objectmapper.impl.DiamondMapper;
-import ar.com.dgarcia.objectmapper.impl.JacksonMapper;
 import ar.com.dgarcia.objectmapper.api.TypeMapper;
+import ar.com.dgarcia.objectmapper.impl.EnsembleMapper;
+import ar.com.dgarcia.objectmapper.impl.JacksonMapper;
 import ar.com.kfgodel.objectmapper.tests.mapper.TypicalObjectMapper;
 import ar.com.kfgodel.objectmapper.tests.testObjects.TypicalObject;
 import org.junit.runner.RunWith;
@@ -45,7 +45,7 @@ public class ConversionPerformanceIT extends JavaSpec<TestContext> {
                     runTestsOn(TypicalObjectMapper.create());
                 });
                 it("implementation mapper",()->{
-                    runTestsOn(DiamondMapper.create());
+                    runTestsOn(EnsembleMapper.create());
                 });
                 it("jackson mapper",()->{
                     runTestsOn(JacksonMapper.create());

@@ -3,9 +3,9 @@ package ar.com.kfgodel.objectmapper.tests;
 import ar.com.dgarcia.javaspec.api.JavaSpec;
 import ar.com.dgarcia.javaspec.api.JavaSpecRunner;
 import ar.com.dgarcia.javaspec.api.TestContext;
-import ar.com.dgarcia.objectmapper.impl.DiamondMapper;
-import ar.com.dgarcia.objectmapper.impl.JacksonMapper;
 import ar.com.dgarcia.objectmapper.api.TypeMapper;
+import ar.com.dgarcia.objectmapper.impl.EnsembleMapper;
+import ar.com.dgarcia.objectmapper.impl.JacksonMapper;
 import ar.com.kfgodel.objectmapper.tests.mapper.TypicalObjectMapper;
 import ar.com.kfgodel.objectmapper.tests.testObjects.TypicalObject;
 import org.junit.runner.RunWith;
@@ -27,32 +27,13 @@ public class ConversionMappingTest extends JavaSpec<TestContext> {
         describe("from object to map", ()->{
 
             it("should be complete with a custom mapper",()->{
-                TypicalObject typicalObject = TypicalObject.create();
-                typicalObject.initializeRootTestData();
-
-                TypeMapper customMapper = TypicalObjectMapper.create();
-                Map<String, Object> converted = customMapper.toMap(typicalObject);
-
-                assertThat(converted).isEqualTo(TypicalObject.createRootTestMap());
+                testDisassemblyFor(TypicalObjectMapper.create());
             });
             it("should be complete with jackson mapper",()->{
-                TypicalObject typicalObject = TypicalObject.create();
-                typicalObject.initializeRootTestData();
-
-                TypeMapper jacksonMapper = JacksonMapper.create();
-                Map<String, Object> converted = jacksonMapper.toMap(typicalObject);
-
-                assertThat(converted).isEqualTo(TypicalObject.createRootTestMap());
+                testDisassemblyFor(JacksonMapper.create());
             });
-            it("should be complete with implementation mapper",()->{
-                TypicalObject typicalObject = TypicalObject.create();
-                typicalObject.initializeRootTestData();
-
-                TypeMapper jacksonMapper = DiamondMapper.create();
-                Map<String, Object> converted = jacksonMapper.toMap(typicalObject);
-
-                assertThat(converted).isEqualTo(TypicalObject.createRootTestMap());
-
+            it("should be complete with ensemble mapper",()->{
+                testDisassemblyFor(EnsembleMapper.create());
             });
 
         });
@@ -71,5 +52,14 @@ public class ConversionMappingTest extends JavaSpec<TestContext> {
         });
 
 
+    }
+
+    private void testDisassemblyFor(TypeMapper customMapper) {
+        TypicalObject typicalObject = TypicalObject.create();
+        typicalObject.initializeRootTestData();
+
+        Map<String, Object> converted = customMapper.toMap(typicalObject);
+
+        assertThat(converted).isEqualTo(TypicalObject.createRootTestMap());
     }
 }
