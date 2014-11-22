@@ -41,33 +41,45 @@ public class ConversionPerformanceIT extends JavaSpec<TestContext> {
                     }
                     assertThat(converted).isEqualTo(TypicalObject.createRootTestMap());
                 });
-                it("native mapper",()->{
-                    runTestsOn(TypicalObjectMapper.create());
+                it("custom made mapper",()->{
+                    runDisassemblyTestsOn(TypicalObjectMapper.create());
                 });
-                it("implementation mapper",()->{
-                    runTestsOn(EnsembleMapper.create());
+                it("ensemble mapper",()->{
+                    runDisassemblyTestsOn(EnsembleMapper.create());
                 });
                 it("jackson mapper",()->{
-                    runTestsOn(JacksonMapper.create());
+                    runDisassemblyTestsOn(JacksonMapper.create());
                 });
             });
 
 
             describe("from map to object", () -> {
-                it("native mapper",()->{
+                it("warm up",()->{
+                    Map<String, Object> testMap = TypicalObject.createRootTestMap();
+
+                    TypicalObjectMapper testedMapper = TypicalObjectMapper.create();
+                    TypicalObject converted = null;
+                    for (int i = 0; i < 1_000_000; i++) {
+                        converted = testedMapper.fromMap(testMap, TypicalObject.class);
+                    }
+                    TypicalObject expected = TypicalObject.create();
+                    expected.initializeRootTestData();
+                    assertThat(converted).isEqualTo(expected);
+                });
+                it("custom made mapper",()->{
+                    runAssemblyTestsOn(TypicalObjectMapper.create());
+                });
+                it("ensemble mapper",()->{
 
                 });
                 it("jackson mapper",()->{
-
-                });
-                it("implementation mapper",()->{
-
+                    runAssemblyTestsOn(JacksonMapper.create());
                 });
             });
         });
     }
 
-    private void runTestsOn(TypeMapper testedMapper) {
+    private void runDisassemblyTestsOn(TypeMapper testedMapper) {
         TypicalObject typicalObject = TypicalObject.create();
         typicalObject.initializeRootTestData();
 
@@ -78,7 +90,23 @@ public class ConversionPerformanceIT extends JavaSpec<TestContext> {
             converted = testedMapper.toMap(typicalObject);
         }
         long ended = System.nanoTime();
-        LOG.info("{}: {} ms", testedMapper.getClass().getSimpleName() , TimeUnit.NANOSECONDS.toMillis(ended - started));
+        LOG.info("Disassembly {}: {} ms", testedMapper.getClass().getSimpleName() , TimeUnit.NANOSECONDS.toMillis(ended - started));
         assertThat(converted).isEqualTo(TypicalObject.createRootTestMap());
+    }
+
+    private void runAssemblyTestsOn(TypeMapper testedMapper) {
+
+        Map<String, Object> testMap = TypicalObject.createRootTestMap();
+
+        long started = System.nanoTime();
+        TypicalObject converted = null;
+        for (int i = 0; i < 1_000_000; i++) {
+            converted = testedMapper.fromMap(testMap, TypicalObject.class);
+        }
+        long ended = System.nanoTime();
+        LOG.info("Assembly {}: {} ms", testedMapper.getClass().getSimpleName() , TimeUnit.NANOSECONDS.toMillis(ended - started));
+        TypicalObject expected = TypicalObject.create();
+        expected.initializeRootTestData();
+        assertThat(converted).isEqualTo(expected);
     }
 }

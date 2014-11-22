@@ -19,7 +19,7 @@ public class JacksonMapper implements TypeMapper {
 
     @Override
     public <T> T fromMap(Map<String, Object> map, Class<T> expectedType) {
-        return null;
+        return internalMapper.convertValue(map, expectedType);
     }
 
     public static JacksonMapper create() {

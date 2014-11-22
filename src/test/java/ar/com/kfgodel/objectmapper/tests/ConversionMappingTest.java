@@ -41,10 +41,10 @@ public class ConversionMappingTest extends JavaSpec<TestContext> {
         describe("from map to object", () -> {
 
             it("should be complete with a custom mapper", () -> {
-
+                testAssembly(TypicalObjectMapper.create());
             });
             it("should be complete with jackson mapper", () -> {
-
+                testAssembly(JacksonMapper.create());
             });
             it("should be complete with implementation mapper", () -> {
 
@@ -54,11 +54,21 @@ public class ConversionMappingTest extends JavaSpec<TestContext> {
 
     }
 
-    private void testDisassemblyFor(TypeMapper customMapper) {
+    private void testAssembly(TypeMapper mapper) {
+        Map<String, Object> rootTestMap = TypicalObject.createRootTestMap();
+
+        TypicalObject converted = mapper.fromMap(rootTestMap, TypicalObject.class);
+
+        TypicalObject typicalObject = TypicalObject.create();
+        typicalObject.initializeRootTestData();
+        assertThat(converted).isEqualTo(typicalObject);
+    }
+
+    private void testDisassemblyFor(TypeMapper mapper) {
         TypicalObject typicalObject = TypicalObject.create();
         typicalObject.initializeRootTestData();
 
-        Map<String, Object> converted = customMapper.toMap(typicalObject);
+        Map<String, Object> converted = mapper.toMap(typicalObject);
 
         assertThat(converted).isEqualTo(TypicalObject.createRootTestMap());
     }

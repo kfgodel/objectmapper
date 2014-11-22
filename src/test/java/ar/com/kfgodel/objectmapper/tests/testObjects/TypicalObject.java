@@ -1,6 +1,7 @@
 package ar.com.kfgodel.objectmapper.tests.testObjects;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * This type serves as a test object for conversion tests
@@ -26,7 +27,7 @@ public class TypicalObject {
     private ReferencedObject anotherReference;
     public static final String anotherReference_FIELD = "anotherReference";
     
-    private Map<String, Object> referencedMap;
+    private Map<String, ReferencedObject> referencedMap;
     public static final String referencedMap_FIELD = "referencedMap";
 
 
@@ -78,11 +79,11 @@ public class TypicalObject {
         this.anotherReference = anotherReference;
     }
 
-    public Map<String, Object> getReferencedMap() {
+    public Map<String, ReferencedObject> getReferencedMap() {
         return referencedMap;
     }
 
-    public void setReferencedMap(Map<String, Object> referencedMap) {
+    public void setReferencedMap(Map<String, ReferencedObject> referencedMap) {
         this.referencedMap = referencedMap;
     }
 
@@ -146,6 +147,23 @@ public class TypicalObject {
         map.put(anotherReference_FIELD, null);
         map.put(referencedMap_FIELD, new LinkedHashMap<>());
         return map;
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        TypicalObject other = (TypicalObject) obj;
+        if(!this.referencedMap.equals(other.referencedMap)){
+            return false;
+        }
+
+        return Stream.of(obj)
+                .filter(TypicalObject.class::isInstance)
+                .map(TypicalObject.class::cast)
+                .filter((that) -> Objects.equals(this.stringPrimitive, that.stringPrimitive))
+                .filter((that) -> Arrays.equals(this.arrayPrimitive, that.arrayPrimitive))
+                .filter((that) -> Objects.equals(this.otherObject, that.otherObject))
+                .filter((that) -> Objects.equals(this.otherObjects, that.otherObjects))
+                .filter((that) -> Objects.equals(this.referencedMap, that.referencedMap))
+                .anyMatch((that) -> true);
     }
 }

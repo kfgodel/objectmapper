@@ -2,6 +2,8 @@ package ar.com.kfgodel.objectmapper.tests.testObjects;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * This type serves as a test object for conversion tests
@@ -46,4 +48,13 @@ public class ReferencedObject {
         return map;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return Stream.of(obj)
+                .filter(ReferencedObject.class::isInstance)
+                .map(ReferencedObject.class::cast)
+                .filter((that)-> Objects.equals(this.age, that.age))
+                .filter((that)-> Objects.equals(this.name, that.name))
+                .anyMatch((that)-> true);
+    }
 }

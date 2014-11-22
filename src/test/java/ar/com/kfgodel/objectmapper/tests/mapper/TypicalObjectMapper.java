@@ -24,15 +24,15 @@ public class TypicalObjectMapper implements TypeMapper {
         map.put(TypicalObject.otherObject_FIELD, toMap(object.getOtherObject()));
         map.put(TypicalObject.otherObjects_FIELD, convertToListOfMaps(object.getOtherObjects()));
         map.put(TypicalObject.anotherReference_FIELD, convertToMap(object.getAnotherReference()));
-        map.put(TypicalObject.referencedMap_FIELD, translateMap(object.getReferencedMap()));
+        map.put(TypicalObject.referencedMap_FIELD, translateToMap(object.getReferencedMap()));
         return map;
     }
 
-    private Map<String, Object> translateMap(Map<String, Object> referencedMap) {
+    private Map<String, Object> translateToMap(Map<String, ReferencedObject> referencedMap) {
         Map<String, Object> translated = new LinkedHashMap<>();
-        Set<Map.Entry<String, Object>> entries = referencedMap.entrySet();
-        for (Map.Entry<String, Object> entry : entries) {
-            translated.put(entry.getKey(), convertToMap((ReferencedObject) entry.getValue()));
+        Set<Map.Entry<String, ReferencedObject>> entries = referencedMap.entrySet();
+        for (Map.Entry<String, ReferencedObject> entry : entries) {
+            translated.put(entry.getKey(), convertToMap(entry.getValue()));
         }
         return translated;
     }
@@ -64,7 +64,58 @@ public class TypicalObjectMapper implements TypeMapper {
 
     @Override
     public <T> T fromMap(Map<String, Object> map, Class<T> expectedType) {
-        return null;
+        if(map == null){
+            return null;
+        }
+        TypicalObject object = new TypicalObject();
+        object.setIntPrimitive((Integer) map.get(TypicalObject.intPrimitive_FIELD));
+        object.setStringPrimitive((String) map.get(TypicalObject.stringPrimitive_FIELD));
+        object.setArrayPrimitive(convertFromList((List<String>) map.get(TypicalObject.arrayPrimitive_FIELD)));
+        object.setOtherObject(fromMap((Map<String, Object>) map.get(TypicalObject.otherObject_FIELD), TypicalObject.class));
+        object.setOtherObjects(convertFromListOfMaps((List<Map<String, Object>>) map.get(TypicalObject.otherObjects_FIELD)));
+        object.setAnotherReference(convertFromMap((Map<String, Object>) map.get(TypicalObject.anotherReference_FIELD)));
+        object.setReferencedMap(translateFromMap((Map<String, Object>) map.get(TypicalObject.referencedMap_FIELD)));
+        return (T) object;
+
+//        Map<String, Object> map = new LinkedHashMap<>();
+//        map.put(TypicalObject.intPrimitive_FIELD, object.getIntPrimitive());
+//        map.put(TypicalObject.stringPrimitive_FIELD, object.getStringPrimitive());
+//        map.put(TypicalObject.arrayPrimitive_FIELD, convertToList(object.getArrayPrimitive()));
+//        map.put(TypicalObject.otherObject_FIELD, toMap(object.getOtherObject()));
+//        map.put(TypicalObject.otherObjects_FIELD, convertToListOfMaps(object.getOtherObjects()));
+//        map.put(TypicalObject.anotherReference_FIELD, convertToMap(object.getAnotherReference()));
+//        map.put(TypicalObject.referencedMap_FIELD, translateMap(object.getReferencedMap()));
+//        return map;
+    }
+
+    private Map<String, ReferencedObject> translateFromMap(Map<String, Object> referencedMap) {
+        Map<String, ReferencedObject> translated = new LinkedHashMap<>();
+        Set<Map.Entry<String, Object>> entries = referencedMap.entrySet();
+        for (Map.Entry<String, Object> entry : entries) {
+            translated.put(entry.getKey(), convertFromMap((Map<String, Object>) entry.getValue()));
+        }
+        return translated;
+    }
+
+    private ReferencedObject convertFromMap(Map<String, Object> map) {
+        if(map== null){
+            return null;
+        }
+        Integer age = (Integer) map.get(ReferencedObject.age_FIELD);
+        String name = (String) map.get(ReferencedObject.name_FIELD);
+        return ReferencedObject.create(age, name);
+    }
+
+    private List<TypicalObject> convertFromListOfMaps(List<Map<String, Object>> maps) {
+        List<TypicalObject> objects = new ArrayList<>();
+        for (Map<String, Object> map : maps) {
+            objects.add(fromMap(map, TypicalObject.class));
+        }
+        return objects;
+    }
+
+    private String[] convertFromList(List<String> strings) {
+        return strings.toArray(new String[strings.size()]);
     }
 
     public static TypicalObjectMapper create() {
