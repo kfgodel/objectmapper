@@ -1,4 +1,4 @@
-package ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers;
+package ar.com.dgarcia.objectmapper.impl.ensemble.transformers;
 
 import java.util.function.Function;
 

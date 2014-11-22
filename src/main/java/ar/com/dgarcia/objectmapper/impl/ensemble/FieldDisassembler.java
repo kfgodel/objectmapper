@@ -1,21 +1,22 @@
 package ar.com.dgarcia.objectmapper.impl.ensemble;
 
 import ar.com.dgarcia.objectmapper.api.ensemble.ObjectDisassembler;
+import ar.com.dgarcia.objectmapper.api.ensemble.cache.WeakCache;
 import ar.com.dgarcia.objectmapper.api.ensemble.disassembly.DisassemblyInstruction;
 import ar.com.dgarcia.objectmapper.api.ensemble.disassembly.DisassemblyPlan;
 import ar.com.dgarcia.objectmapper.api.ensemble.disassembly.DisassemblyTransformer;
+import ar.com.dgarcia.objectmapper.impl.ensemble.cache.WeakMapCache;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.DisassembledValueTransformer;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.DisassemblyArrayPlan;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.instructions.FieldGetterInstruction;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.instructions.GetAndTransformInstruction;
-import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.NoChange;
+import ar.com.dgarcia.objectmapper.impl.ensemble.transformers.NoChange;
 import ar.com.kfgodel.diamond.api.Diamond;
 import ar.com.kfgodel.diamond.api.fields.TypeField;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,8 @@ import java.util.stream.Collectors;
 public class FieldDisassembler implements ObjectDisassembler {
 
     private DisassemblyTransformer valueTransformer;
-    private Map<Class<?>, DisassemblyPlan> planPerType;
+    private WeakCache<Class<?>, DisassemblyPlan> planPerType;
+
 
     @Override
     public Map<String, Object> disassemble(Object instance) {
@@ -50,13 +52,7 @@ public class FieldDisassembler implements ObjectDisassembler {
      * @return The plan to use for objects of the given type
      */
     private DisassemblyPlan getPlanFor(Class<?> instanceType) {
-        DisassemblyPlan existingPlan = planPerType.get(instanceType);
-        if(existingPlan != null){
-            return existingPlan;
-        }
-        DisassemblyPlan createdPlan = createPlanFor(instanceType);
-        planPerType.put(instanceType, createdPlan);
-        return createdPlan;
+        return planPerType.getOrCreateFor(instanceType, ()-> createPlanFor(instanceType));
     }
 
     /**
@@ -86,7 +82,7 @@ public class FieldDisassembler implements ObjectDisassembler {
 
     public static FieldDisassembler create() {
         FieldDisassembler disassembler = new FieldDisassembler();
-        disassembler.planPerType = new WeakHashMap<>();
+        disassembler.planPerType = WeakMapCache.create();
         disassembler.valueTransformer = DisassembledValueTransformer.create(disassembler);
         return disassembler;
     }

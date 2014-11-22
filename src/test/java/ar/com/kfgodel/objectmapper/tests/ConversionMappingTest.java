@@ -47,7 +47,7 @@ public class ConversionMappingTest extends JavaSpec<TestContext> {
                 testAssembly(JacksonMapper.create());
             });
             it("should be complete with implementation mapper", () -> {
-
+                testAssembly(EnsembleMapper.create());
             });
         });
 

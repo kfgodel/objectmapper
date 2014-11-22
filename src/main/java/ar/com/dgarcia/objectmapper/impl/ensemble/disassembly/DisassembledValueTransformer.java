@@ -1,15 +1,16 @@
 package ar.com.dgarcia.objectmapper.impl.ensemble.disassembly;
 
 import ar.com.dgarcia.objectmapper.api.ensemble.ObjectDisassembler;
+import ar.com.dgarcia.objectmapper.api.ensemble.cache.WeakCache;
 import ar.com.dgarcia.objectmapper.api.ensemble.disassembly.DisassemblyTransformer;
+import ar.com.dgarcia.objectmapper.impl.ensemble.cache.WeakMapCache;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.ArrayDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.CollectionDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.MapDisassembler;
-import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.NoChange;
+import ar.com.dgarcia.objectmapper.impl.ensemble.transformers.NoChange;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.function.Function;
 
 /**
@@ -18,7 +19,7 @@ import java.util.function.Function;
  */
 public class DisassembledValueTransformer implements DisassemblyTransformer {
 
-    private Map<Class<?>, Function<Object, Object>> transformerPerType = new WeakHashMap<>();
+    private WeakCache<Class<?>, Function<Object, Object>> transformerPerType;
 
     private ArrayDisassembler arrayDisassembler;
     private CollectionDisassembler collectionDisassembler;
@@ -27,6 +28,7 @@ public class DisassembledValueTransformer implements DisassemblyTransformer {
 
     public static DisassembledValueTransformer create(ObjectDisassembler disassembler) {
         DisassembledValueTransformer transformer = new DisassembledValueTransformer();
+        transformer.transformerPerType = WeakMapCache.create();
         transformer.arrayDisassembler = ArrayDisassembler.create(transformer);
         transformer.collectionDisassembler = CollectionDisassembler.create(transformer);
         transformer.mapDisassembler = MapDisassembler.create(transformer);
@@ -46,12 +48,7 @@ public class DisassembledValueTransformer implements DisassemblyTransformer {
     }
 
     public Function<Object, Object> getTransformerFor(Class<?> valueType) {
-        Function<Object, Object> valueTransformer = transformerPerType.get(valueType);
-        if(valueTransformer == null){
-            valueTransformer = defineTransformerFor(valueType);
-            transformerPerType.put(valueType, valueTransformer);
-        }
-        return valueTransformer;
+        return transformerPerType.getOrCreateFor(valueType, ()-> defineTransformerFor(valueType));
     }
 
     private Function<Object, Object> defineTransformerFor(Class<?> valueType) {

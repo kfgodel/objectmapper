@@ -1,8 +1,11 @@
 package ar.com.dgarcia.objectmapper.impl;
 
 import ar.com.dgarcia.objectmapper.api.TypeMapper;
+import ar.com.dgarcia.objectmapper.api.ensemble.ObjectAssembler;
 import ar.com.dgarcia.objectmapper.api.ensemble.ObjectDisassembler;
+import ar.com.dgarcia.objectmapper.impl.ensemble.FieldAssembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.FieldDisassembler;
+import ar.com.kfgodel.diamond.api.Diamond;
 
 import java.util.Map;
 
@@ -13,6 +16,7 @@ import java.util.Map;
 public class EnsembleMapper implements TypeMapper {
 
     private ObjectDisassembler disassembler;
+    private ObjectAssembler assembler;
 
     @Override
     public Map<String, Object> toMap(Object instance) {
@@ -21,12 +25,13 @@ public class EnsembleMapper implements TypeMapper {
 
     @Override
     public <T> T fromMap(Map<String, Object> map, Class<T> expectedType) {
-        return null;
+        return assembler.assemble(map, Diamond.of(expectedType));
     }
 
     public static EnsembleMapper create() {
         EnsembleMapper mapper = new EnsembleMapper();
         mapper.disassembler = FieldDisassembler.create();
+        mapper.assembler = FieldAssembler.create();
         return mapper;
     }
 

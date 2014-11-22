@@ -70,7 +70,7 @@ public class ConversionPerformanceIT extends JavaSpec<TestContext> {
                     runAssemblyTestsOn(TypicalObjectMapper.create());
                 });
                 it("ensemble mapper",()->{
-
+                    runAssemblyTestsOn(EnsembleMapper.create());
                 });
                 it("jackson mapper",()->{
                     runAssemblyTestsOn(JacksonMapper.create());
