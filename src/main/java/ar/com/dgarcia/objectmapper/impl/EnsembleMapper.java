@@ -5,6 +5,8 @@ import ar.com.dgarcia.objectmapper.api.ensemble.ObjectAssembler;
 import ar.com.dgarcia.objectmapper.api.ensemble.ObjectDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.FieldAssembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.FieldDisassembler;
+import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.AssembledValueTransformer;
+import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.DisassembledValueTransformer;
 import ar.com.kfgodel.diamond.api.Diamond;
 
 import java.util.Map;
@@ -28,10 +30,18 @@ public class EnsembleMapper implements TypeMapper {
         return assembler.assemble(map, Diamond.of(expectedType));
     }
 
+    public ObjectDisassembler getDisassembler() {
+        return disassembler;
+    }
+
+    public ObjectAssembler getAssembler() {
+        return assembler;
+    }
+
     public static EnsembleMapper create() {
         EnsembleMapper mapper = new EnsembleMapper();
-        mapper.disassembler = FieldDisassembler.create();
-        mapper.assembler = FieldAssembler.create();
+        mapper.disassembler = FieldDisassembler.create(DisassembledValueTransformer.create());
+        mapper.assembler = FieldAssembler.create(AssembledValueTransformer.create());
         return mapper;
     }
 

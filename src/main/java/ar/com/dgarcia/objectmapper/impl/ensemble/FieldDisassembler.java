@@ -1,12 +1,12 @@
 package ar.com.dgarcia.objectmapper.impl.ensemble;
 
+import ar.com.dgarcia.objectmapper.api.MapperException;
 import ar.com.dgarcia.objectmapper.api.ensemble.ObjectDisassembler;
-import ar.com.dgarcia.objectmapper.api.ensemble.cache.WeakCache;
+import ar.com.dgarcia.objectmapper.api.ensemble.cache.Cache;
 import ar.com.dgarcia.objectmapper.api.ensemble.disassembly.DisassemblyInstruction;
 import ar.com.dgarcia.objectmapper.api.ensemble.disassembly.DisassemblyPlan;
 import ar.com.dgarcia.objectmapper.api.ensemble.disassembly.DisassemblyTransformer;
 import ar.com.dgarcia.objectmapper.impl.ensemble.cache.WeakMapCache;
-import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.DisassembledValueTransformer;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.DisassemblyArrayPlan;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.instructions.FieldGetterInstruction;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.instructions.GetAndTransformInstruction;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class FieldDisassembler implements ObjectDisassembler {
 
     private DisassemblyTransformer valueTransformer;
-    private WeakCache<Class<?>, DisassemblyPlan> planPerType;
+    private Cache<Class<?>, DisassemblyPlan> planPerType;
 
 
     @Override
@@ -44,6 +44,19 @@ public class FieldDisassembler implements ObjectDisassembler {
             map.put(instruction.getPartName(), instruction.getPartFrom(instance));
         }
         return map;
+    }
+
+    @Override
+    public DisassemblyTransformer getDisassemblyTransformer() {
+        if(valueTransformer == null){
+            throw new MapperException("A value transformer was not defined for this field disassembler");
+        }
+        return valueTransformer;
+    }
+
+    @Override
+    public void setDisassemblyTransformer(DisassemblyTransformer transformer) {
+        this.valueTransformer = transformer;
     }
 
     /**
@@ -70,7 +83,7 @@ public class FieldDisassembler implements ObjectDisassembler {
 
     private DisassemblyInstruction createInstructionFor(TypeField instanceField) {
         Class<?> valueType = instanceField.type().nativeTypes().get();
-        Function<Object, Object> disassemblyTransformer = valueTransformer.getTransformerFor(valueType);
+        Function<Object, Object> disassemblyTransformer = getDisassemblyTransformer().getTransformerFor(valueType);
 
         FieldGetterInstruction getterInstruction = FieldGetterInstruction.create(instanceField);
         if(disassemblyTransformer == NoChange.INSTANCE){
@@ -83,8 +96,15 @@ public class FieldDisassembler implements ObjectDisassembler {
     public static FieldDisassembler create() {
         FieldDisassembler disassembler = new FieldDisassembler();
         disassembler.planPerType = WeakMapCache.create();
-        disassembler.valueTransformer = DisassembledValueTransformer.create(disassembler);
         return disassembler;
     }
+
+    public static FieldDisassembler create(DisassemblyTransformer valueTransformer) {
+        FieldDisassembler disassembler = create();
+        disassembler.setDisassemblyTransformer(valueTransformer);
+        valueTransformer.setObjectDisassembler(disassembler);
+        return disassembler;
+    }
+
 
 }

@@ -2,16 +2,18 @@ package ar.com.dgarcia.objectmapper.impl.ensemble.assembly;
 
 import ar.com.dgarcia.objectmapper.api.ensemble.ObjectAssembler;
 import ar.com.dgarcia.objectmapper.api.ensemble.assembly.AssemblyTransformer;
-import ar.com.dgarcia.objectmapper.api.ensemble.cache.WeakCache;
+import ar.com.dgarcia.objectmapper.api.ensemble.cache.Cache;
 import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.transformers.ArrayAssembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.transformers.CollectionAssembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.transformers.MapAssembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.transformers.ObjectAssemblerAdapter;
 import ar.com.dgarcia.objectmapper.impl.ensemble.cache.WeakMapCache;
 import ar.com.dgarcia.objectmapper.impl.ensemble.transformers.NoChange;
+import ar.com.kfgodel.diamond.api.Diamond;
 import ar.com.kfgodel.diamond.api.types.TypeInstance;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -21,15 +23,25 @@ import java.util.function.Function;
  */
 public class AssembledValueTransformer implements AssemblyTransformer {
 
-    private WeakCache<TypeInstance, Function<Object, Object>> transformerPerType;
-    private ObjectAssembler assembler;
+    private Cache<TypeInstance, Function<Object, Object>> transformerPerType;
+    private Map<TypeInstance, Function<Object,Object>> customPerType;
 
-    public static AssembledValueTransformer create(ObjectAssembler assembler) {
+    private ObjectAssembler objectAssembler;
+
+    public static AssembledValueTransformer create() {
         AssembledValueTransformer transformer = new AssembledValueTransformer();
         transformer.transformerPerType = WeakMapCache.create();
-        transformer.assembler = assembler;
+        transformer.customPerType = new HashMap<>();
         return transformer;
     }
+
+    public static AssembledValueTransformer create(ObjectAssembler assembler) {
+        AssembledValueTransformer transformer = create();
+        transformer.setObjectAssembler(assembler);
+        assembler.setAssemblyTransformer(transformer);
+        return transformer;
+    }
+
 
     @Override
     public Object transform(Object value, TypeInstance expectedType) {
@@ -41,7 +53,21 @@ public class AssembledValueTransformer implements AssemblyTransformer {
         return transformedValue;
     }
 
+    @Override
+    public <T> void addTransformerFor(Class<T> typicalObjectClass, Function<?, ? extends T> customTransformer) {
+        customPerType.put(Diamond.of(typicalObjectClass), (Function<Object, Object>) customTransformer);
+    }
+
+    @Override
+    public void setObjectAssembler(ObjectAssembler assembler) {
+        this.objectAssembler = assembler;
+    }
+
     public Function<Object, Object> getTransformerFor(TypeInstance valueType) {
+        Function<Object, Object> customDefined = customPerType.get(valueType);
+        if(customDefined != null){
+            return customDefined;
+        }
         return transformerPerType.getOrCreateFor(valueType, ()-> defineTransformerFor(valueType));
     }
 
@@ -66,7 +92,7 @@ public class AssembledValueTransformer implements AssemblyTransformer {
         if(Map.class.isAssignableFrom(nativeType)){
             return MapAssembler.create(this, expectedType);
         }
-        return ObjectAssemblerAdapter.create(assembler, expectedType);
+        return ObjectAssemblerAdapter.create(objectAssembler, expectedType);
     }
 
 }

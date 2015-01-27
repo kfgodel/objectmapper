@@ -1,10 +1,12 @@
 package ar.com.dgarcia.objectmapper.api.ensemble;
 
+import ar.com.dgarcia.objectmapper.api.ensemble.disassembly.DisassemblyTransformer;
+
 import java.util.Map;
 import java.util.function.Function;
 
 /**
- * This type represents an object disassembler that represents the state of an object into a map
+ * This type represents an object disassembler that maps the state of an object into a map
  * Created by kfgodel on 20/11/14.
  */
 public interface ObjectDisassembler extends Function<Object, Object> {
@@ -25,4 +27,12 @@ public interface ObjectDisassembler extends Function<Object, Object> {
     default Object apply(Object instance){
         return disassemble(instance);
     }
+
+    /**
+     * The internal transformer used for type conversion
+     * @return The transformer used for type conversions
+     */
+    DisassemblyTransformer getDisassemblyTransformer();
+
+    void setDisassemblyTransformer(DisassemblyTransformer transformer);
 }

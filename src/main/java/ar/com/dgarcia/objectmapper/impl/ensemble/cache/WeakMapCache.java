@@ -1,6 +1,6 @@
 package ar.com.dgarcia.objectmapper.impl.ensemble.cache;
 
-import ar.com.dgarcia.objectmapper.api.ensemble.cache.WeakCache;
+import ar.com.dgarcia.objectmapper.api.ensemble.cache.Cache;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -10,7 +10,7 @@ import java.util.function.Supplier;
  * This type implements a weak cache with a weakHashMap
  * Created by kfgodel on 21/11/14.
  */
-public class WeakMapCache<K,V> implements WeakCache<K,V> {
+public class WeakMapCache<K,V> implements Cache<K,V> {
 
     private Map<K, V> cacheMap;
 

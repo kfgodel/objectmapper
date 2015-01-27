@@ -1,11 +1,11 @@
 package ar.com.dgarcia.objectmapper.impl.ensemble;
 
+import ar.com.dgarcia.objectmapper.api.MapperException;
 import ar.com.dgarcia.objectmapper.api.ensemble.ObjectAssembler;
 import ar.com.dgarcia.objectmapper.api.ensemble.assembly.AssemblyInstruction;
 import ar.com.dgarcia.objectmapper.api.ensemble.assembly.AssemblyPlan;
 import ar.com.dgarcia.objectmapper.api.ensemble.assembly.AssemblyTransformer;
-import ar.com.dgarcia.objectmapper.api.ensemble.cache.WeakCache;
-import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.AssembledValueTransformer;
+import ar.com.dgarcia.objectmapper.api.ensemble.cache.Cache;
 import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.AssemblyArrayPlan;
 import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.instructions.FieldSetterInstruction;
 import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.instructions.TransformAndSetInstruction;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  */
 public class FieldAssembler implements ObjectAssembler {
 
-    private WeakCache<TypeInstance, AssemblyPlan> planPerType;
+    private Cache<TypeInstance, AssemblyPlan> planPerType;
     private AssemblyTransformer valueTransformer;
 
     @Override
@@ -46,6 +46,11 @@ public class FieldAssembler implements ObjectAssembler {
         return createdInstance;
     }
 
+    @Override
+    public void setAssemblyTransformer(AssemblyTransformer transformer) {
+        this.valueTransformer = transformer;
+    }
+
     private <T> AssemblyPlan getPlanFor(TypeInstance expectedType) {
         return planPerType.getOrCreateFor(expectedType, ()-> createPlanFor(expectedType));
     }
@@ -60,7 +65,7 @@ public class FieldAssembler implements ObjectAssembler {
 
     private AssemblyInstruction createInstructionFor(TypeField instanceField) {
         TypeInstance fieldType = instanceField.type();
-        Function<Object, Object> assemblyTransformer = valueTransformer.getTransformerFor(fieldType);
+        Function<Object, Object> assemblyTransformer = getValueTransformer().getTransformerFor(fieldType);
 
         FieldSetterInstruction setterInstruction = FieldSetterInstruction.create(instanceField);
         if(assemblyTransformer == NoChange.INSTANCE){
@@ -73,8 +78,21 @@ public class FieldAssembler implements ObjectAssembler {
     public static FieldAssembler create() {
         FieldAssembler assembler = new FieldAssembler();
         assembler.planPerType = WeakMapCache.create();
-        assembler.valueTransformer = AssembledValueTransformer.create(assembler);
         return assembler;
     }
 
+    public static FieldAssembler create(AssemblyTransformer assemblyTransformer) {
+        FieldAssembler assembler = create();
+        assembler.setAssemblyTransformer(assemblyTransformer);
+        assemblyTransformer.setObjectAssembler(assembler);
+        return assembler;
+    }
+
+
+    public AssemblyTransformer getValueTransformer() {
+        if(valueTransformer == null){
+            throw new MapperException("A value transformer was not defined for this field assembler");
+        }
+        return valueTransformer;
+    }
 }

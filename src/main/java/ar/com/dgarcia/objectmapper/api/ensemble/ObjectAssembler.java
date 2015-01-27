@@ -1,5 +1,6 @@
 package ar.com.dgarcia.objectmapper.api.ensemble;
 
+import ar.com.dgarcia.objectmapper.api.ensemble.assembly.AssemblyTransformer;
 import ar.com.kfgodel.diamond.api.types.TypeInstance;
 
 import java.util.Map;
@@ -20,4 +21,5 @@ public interface ObjectAssembler {
      */
     <T> T assemble(Map<String,Object> map, TypeInstance expectedType);
 
+    void setAssemblyTransformer(AssemblyTransformer transformer);
 }
