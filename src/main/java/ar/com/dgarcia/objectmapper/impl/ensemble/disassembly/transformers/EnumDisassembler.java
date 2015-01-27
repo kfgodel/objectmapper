@@ -3,7 +3,7 @@ package ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers;
 import java.util.function.Function;
 
 /**
- * This type represents an enum dissasembler that uses only the name of the enum as representation
+ * This type represents an enum disassembler that uses only the name of the enum as its representation
  * Created by ikari on 27/01/2015.
  */
 public class EnumDisassembler implements Function<Object, Object> {
