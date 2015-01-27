@@ -4,7 +4,6 @@ import ar.com.dgarcia.javaspec.api.JavaSpec;
 import ar.com.dgarcia.javaspec.api.JavaSpecRunner;
 import ar.com.dgarcia.javaspec.api.TestContext;
 import ar.com.dgarcia.objectmapper.api.TypeMapper;
-import ar.com.dgarcia.objectmapper.impl.EnsembleMapper;
 import ar.com.dgarcia.objectmapper.impl.JacksonMapper;
 import ar.com.dgarcia.objectmapper.impl.TransformerMapper;
 import ar.com.kfgodel.objectmapper.tests.mapper.CustomMadeTypicalObjectAssembler;
@@ -27,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(JavaSpecRunner.class)
 public class ConversionPerformanceIT extends JavaSpec<TestContext> {
     public static Logger LOG = LoggerFactory.getLogger(ConversionPerformanceIT.class);
-    public static long CONVERSION_COUNT = 1_000_000;
+    public static long CONVERSION_COUNT = 10_000_000;
 
     @Override
     public void define() {
@@ -47,18 +46,16 @@ public class ConversionPerformanceIT extends JavaSpec<TestContext> {
                     }
                     assertThat(converted).isEqualTo(TypicalObject.createRootTestMap());
                 });
-                it("custom made mapper", () -> {
-                    runDisassemblyTestsOn(TypicalObjectMapper.create());
-                });
-                it("ensemble mapper", () -> {
-                    EnsembleMapper ensembleMapper = EnsembleMapper.create();
-                    ensembleMapper.getDisassembler().getDisassemblyTransformer().addTransformerFor(TypicalObject.class, CustomMadeTypicalObjectDisassembler.create());
-                    runDisassemblyTestsOn(ensembleMapper);
-                });
                 it("transformer mapper",()->{
+                    runDisassemblyTestsOn(TransformerMapper.create());
+                });
+                it("custom transformer mapper", () -> {
                     TransformerMapper transformerMapper = TransformerMapper.create();
                     transformerMapper.getDisassemblyTransformer().addTransformerFor(TypicalObject.class, CustomMadeTypicalObjectDisassembler.create());
                     runDisassemblyTestsOn(transformerMapper);
+                });
+                it("custom made mapper", () -> {
+                    runDisassemblyTestsOn(TypicalObjectMapper.create());
                 });
                 it("jackson mapper", () -> {
                     runDisassemblyTestsOn(JacksonMapper.create());
@@ -67,7 +64,7 @@ public class ConversionPerformanceIT extends JavaSpec<TestContext> {
 
 
             describe("from map to object", () -> {
-                it("warm up",()->{
+                it("warm up", () -> {
                     Map<String, Object> testMap = TypicalObject.createRootTestMap();
 
                     TypicalObjectMapper testedMapper = TypicalObjectMapper.create();
@@ -79,18 +76,18 @@ public class ConversionPerformanceIT extends JavaSpec<TestContext> {
                     expected.initializeRootTestData();
                     assertThat(converted).isEqualTo(expected);
                 });
-                it("custom made mapper",()->{
-                    runAssemblyTestsOn(TypicalObjectMapper.create());
+                it("transformer mapper", () -> {
+                    runAssemblyTestsOn(TransformerMapper.create());
                 });
-                it("ensemble mapper",()->{
-                    runAssemblyTestsOn(EnsembleMapper.create());
-                });
-                it("transformer mapper",()->{
+                it("custom transformer mapper", () -> {
                     TransformerMapper transformerMapper = TransformerMapper.create();
                     transformerMapper.getAssemblyTransformer().addTransformerFor(TypicalObject.class, CustomMadeTypicalObjectAssembler.create());
                     runAssemblyTestsOn(transformerMapper);
-                });   
-                it("jackson mapper",()->{
+                });
+                it("custom made mapper", () -> {
+                    runAssemblyTestsOn(TypicalObjectMapper.create());
+                });
+                it("jackson mapper", () -> {
                     runAssemblyTestsOn(JacksonMapper.create());
                 });
             });
