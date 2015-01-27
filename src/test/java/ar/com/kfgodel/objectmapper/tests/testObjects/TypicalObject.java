@@ -14,7 +14,10 @@ public class TypicalObject {
     
     private String stringPrimitive;
     public static final String stringPrimitive_FIELD = "stringPrimitive";
-    
+
+    private TestEnum enumPrimitive;
+    public static final String enumPrimitive_FIELD = "enumPrimitive";
+
     private String[] arrayPrimitive;
     public static final String arrayPrimitive_FIELD = "arrayPrimitive";
     
@@ -87,6 +90,14 @@ public class TypicalObject {
         this.referencedMap = referencedMap;
     }
 
+    public TestEnum getEnumPrimitive() {
+        return enumPrimitive;
+    }
+
+    public void setEnumPrimitive(TestEnum enumPrimitive) {
+        this.enumPrimitive = enumPrimitive;
+    }
+
     public static TypicalObject create() {
         TypicalObject typicalObject = new TypicalObject();
         return typicalObject;
@@ -101,6 +112,7 @@ public class TypicalObject {
 
     public void initializeRootTestData(){
         this.intPrimitive = 0;
+        this.enumPrimitive = TestEnum.VALUE_B;
         this.stringPrimitive = "aPrimitive";
         this.arrayPrimitive = new String[]{"uno", "dos", "tres"};
         this.otherObject = create(1);
@@ -114,6 +126,7 @@ public class TypicalObject {
     public void initializeLeafTestData(int number){
         this.intPrimitive = number;
         this.stringPrimitive = "aPrimitive" + number;
+        this.enumPrimitive = TestEnum.VALUE_A;
         this.arrayPrimitive = new String[]{};
         this.otherObject = null;
         this.otherObjects = new ArrayList<>();
@@ -125,6 +138,7 @@ public class TypicalObject {
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
         map.put(intPrimitive_FIELD, 0);
         map.put(stringPrimitive_FIELD, "aPrimitive");
+        map.put(enumPrimitive_FIELD, TestEnum.VALUE_B.name());
         map.put(arrayPrimitive_FIELD, Arrays.asList("uno", "dos", "tres"));
         map.put(otherObject_FIELD, createLeafTestMap(1));
         map.put(otherObjects_FIELD, Arrays.asList(createLeafTestMap(2), createLeafTestMap(3)));
@@ -141,6 +155,7 @@ public class TypicalObject {
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
         map.put(intPrimitive_FIELD, number);
         map.put(stringPrimitive_FIELD, "aPrimitive" + number);
+        map.put(enumPrimitive_FIELD, TestEnum.VALUE_A.name());
         map.put(arrayPrimitive_FIELD, Arrays.asList());
         map.put(otherObject_FIELD, null);
         map.put(otherObjects_FIELD, Arrays.asList());

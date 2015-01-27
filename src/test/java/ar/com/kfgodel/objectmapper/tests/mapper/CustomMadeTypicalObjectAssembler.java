@@ -1,6 +1,7 @@
 package ar.com.kfgodel.objectmapper.tests.mapper;
 
 import ar.com.kfgodel.objectmapper.tests.testObjects.ReferencedObject;
+import ar.com.kfgodel.objectmapper.tests.testObjects.TestEnum;
 import ar.com.kfgodel.objectmapper.tests.testObjects.TypicalObject;
 
 import java.util.*;
@@ -24,6 +25,8 @@ public class CustomMadeTypicalObjectAssembler implements Function<Map<String, Ob
         TypicalObject object = new TypicalObject();
         object.setIntPrimitive((Integer) map.get(TypicalObject.intPrimitive_FIELD));
         object.setStringPrimitive((String) map.get(TypicalObject.stringPrimitive_FIELD));
+        String enumName = (String) map.get(TypicalObject.enumPrimitive_FIELD);
+        object.setEnumPrimitive(TestEnum.valueOf(enumName));
         object.setArrayPrimitive(convertFromList((List<String>) map.get(TypicalObject.arrayPrimitive_FIELD)));
         object.setOtherObject(apply((Map<String, Object>) map.get(TypicalObject.otherObject_FIELD)));
         object.setOtherObjects(convertFromListOfMaps((List<Map<String, Object>>) map.get(TypicalObject.otherObjects_FIELD)));

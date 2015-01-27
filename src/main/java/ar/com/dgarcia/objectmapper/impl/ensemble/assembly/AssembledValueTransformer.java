@@ -4,10 +4,7 @@ import ar.com.dgarcia.objectmapper.api.ensemble.ObjectAssembler;
 import ar.com.dgarcia.objectmapper.api.ensemble.assembly.AssemblyTransformer;
 import ar.com.dgarcia.objectmapper.api.ensemble.cache.Cache;
 import ar.com.dgarcia.objectmapper.impl.ensemble.FieldAssembler;
-import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.transformers.ArrayAssembler;
-import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.transformers.CollectionAssembler;
-import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.transformers.MapAssembler;
-import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.transformers.ObjectAssemblerAdapter;
+import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.transformers.*;
 import ar.com.dgarcia.objectmapper.impl.ensemble.cache.WeakMapCache;
 import ar.com.dgarcia.objectmapper.impl.ensemble.transformers.NoChange;
 import ar.com.kfgodel.diamond.api.Diamond;
@@ -70,6 +67,9 @@ public class AssembledValueTransformer implements AssemblyTransformer {
         }
         if(CharSequence.class.isAssignableFrom(nativeType)){
             return NoChange.INSTANCE;
+        }
+        if(Enum.class.isAssignableFrom(nativeType)){
+            return EnumAssembler.create((Class<? extends Enum>) nativeType);
         }
         Class<?> arrayComponentType = nativeType.getComponentType();
         if(arrayComponentType != null){

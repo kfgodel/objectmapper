@@ -20,6 +20,7 @@ public class CustomMadeTypicalObjectDisassembler implements Function<TypicalObje
         Map<String, Object> map = new LinkedHashMap<>();
         map.put(TypicalObject.intPrimitive_FIELD, object.getIntPrimitive());
         map.put(TypicalObject.stringPrimitive_FIELD, object.getStringPrimitive());
+        map.put(TypicalObject.enumPrimitive_FIELD, object.getEnumPrimitive().name());
         map.put(TypicalObject.arrayPrimitive_FIELD, convertToList(object.getArrayPrimitive()));
         map.put(TypicalObject.otherObject_FIELD, apply(object.getOtherObject()));
         map.put(TypicalObject.otherObjects_FIELD, convertToListOfMaps(object.getOtherObjects()));

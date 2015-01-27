@@ -1,6 +1,5 @@
 package ar.com.dgarcia.objectmapper.impl.ensemble.disassembly;
 
-import ar.com.dgarcia.objectmapper.api.MapperException;
 import ar.com.dgarcia.objectmapper.api.ensemble.ObjectDisassembler;
 import ar.com.dgarcia.objectmapper.api.ensemble.cache.Cache;
 import ar.com.dgarcia.objectmapper.api.ensemble.disassembly.DisassemblyTransformer;
@@ -8,6 +7,7 @@ import ar.com.dgarcia.objectmapper.impl.ensemble.FieldDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.cache.WeakMapCache;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.ArrayDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.CollectionDisassembler;
+import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.EnumDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.MapDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.transformers.NoChange;
 
@@ -29,6 +29,7 @@ public class DisassembledValueTransformer implements DisassemblyTransformer {
     private CollectionDisassembler collectionDisassembler;
     private MapDisassembler mapDisassembler;
     private ObjectDisassembler objectDisassembler;
+    private EnumDisassembler enumDisassembler;
 
     public static DisassembledValueTransformer create() {
         DisassembledValueTransformer transformer = new DisassembledValueTransformer();
@@ -37,6 +38,7 @@ public class DisassembledValueTransformer implements DisassemblyTransformer {
         transformer.collectionDisassembler = CollectionDisassembler.create(transformer);
         transformer.mapDisassembler = MapDisassembler.create(transformer);
         transformer.objectDisassembler = FieldDisassembler.create(transformer);
+        transformer.enumDisassembler = EnumDisassembler.create();
         transformer.customPerType = new HashMap<>();
         return transformer;
     }
@@ -75,6 +77,9 @@ public class DisassembledValueTransformer implements DisassemblyTransformer {
         if(CharSequence.class.isAssignableFrom(valueType)){
             return NoChange.INSTANCE;
         }
+        if(Enum.class.isAssignableFrom(valueType)){
+            return enumDisassembler;
+        }
         if(valueType.getComponentType() != null){
             return arrayDisassembler;
         }
@@ -88,14 +93,6 @@ public class DisassembledValueTransformer implements DisassemblyTransformer {
     }
 
     public ObjectDisassembler getObjectDisassembler() {
-        if(objectDisassembler == null){
-            // Sanity check
-            throw new MapperException("Object disassembler was not defined for this transformer");
-        }
         return objectDisassembler;
-    }
-
-    public void setObjectDisassembler(ObjectDisassembler objectDisassembler) {
-        this.objectDisassembler = objectDisassembler;
     }
 }
