@@ -8,7 +8,7 @@ import java.util.Map;
  * This type represents an object assembler that sets the state of an object from a map
  * Created by kfgodel on 20/11/14.
  */
-public interface ObjectAssembler {
+public interface ObjectAssembler  {
 
     /**
      * Assembles the primitive parts contained in the given map into an object of the expected type.<br>
@@ -19,5 +19,6 @@ public interface ObjectAssembler {
      * @return The created instance with the state from the map
      */
     <T> T assemble(Map<String,Object> map, TypeInstance expectedType);
+
 
 }

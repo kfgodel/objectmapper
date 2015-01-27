@@ -6,7 +6,7 @@ import java.util.function.Supplier;
  * This type represents a cache of weakly referenced objects
  * Created by kfgodel on 21/11/14.
  */
-public interface WeakCache<K,V> {
+public interface Cache<K,V> {
 
     /**
      * Gets the existing value for the given index or creates a new one and stores it weakly

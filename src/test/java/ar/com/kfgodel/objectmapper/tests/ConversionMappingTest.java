@@ -4,8 +4,8 @@ import ar.com.dgarcia.javaspec.api.JavaSpec;
 import ar.com.dgarcia.javaspec.api.JavaSpecRunner;
 import ar.com.dgarcia.javaspec.api.TestContext;
 import ar.com.dgarcia.objectmapper.api.TypeMapper;
-import ar.com.dgarcia.objectmapper.impl.EnsembleMapper;
 import ar.com.dgarcia.objectmapper.impl.JacksonMapper;
+import ar.com.dgarcia.objectmapper.impl.TransformerMapper;
 import ar.com.kfgodel.objectmapper.tests.mapper.TypicalObjectMapper;
 import ar.com.kfgodel.objectmapper.tests.testObjects.TypicalObject;
 import org.junit.runner.RunWith;
@@ -33,7 +33,7 @@ public class ConversionMappingTest extends JavaSpec<TestContext> {
                 testDisassemblyFor(JacksonMapper.create());
             });
             it("should be complete with ensemble mapper",()->{
-                testDisassemblyFor(EnsembleMapper.create());
+                testDisassemblyFor(TransformerMapper.create());
             });
 
         });
@@ -47,7 +47,7 @@ public class ConversionMappingTest extends JavaSpec<TestContext> {
                 testAssembly(JacksonMapper.create());
             });
             it("should be complete with implementation mapper", () -> {
-                testAssembly(EnsembleMapper.create());
+                testAssembly(TransformerMapper.create());
             });
         });
 

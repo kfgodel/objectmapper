@@ -19,4 +19,12 @@ public interface DisassemblyTransformer {
      * Returns the converter to use for the given value type
      */
     Function<Object, Object> getTransformerFor(Class<?> valueType);
+
+    /**
+     * Adds a custom transformer for a specific type
+     * @param typicalObjectClass The type that needs a custom transformer
+     * @param customTransformer The function to use for that type when disassembling
+     */
+    <T> void addTransformerFor(Class<T> typicalObjectClass, Function<? super T, ?> customTransformer);
+
 }

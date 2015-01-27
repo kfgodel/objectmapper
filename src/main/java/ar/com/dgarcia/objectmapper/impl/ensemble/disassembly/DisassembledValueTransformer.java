@@ -1,8 +1,10 @@
 package ar.com.dgarcia.objectmapper.impl.ensemble.disassembly;
 
+import ar.com.dgarcia.objectmapper.api.MapperException;
 import ar.com.dgarcia.objectmapper.api.ensemble.ObjectDisassembler;
-import ar.com.dgarcia.objectmapper.api.ensemble.cache.WeakCache;
+import ar.com.dgarcia.objectmapper.api.ensemble.cache.Cache;
 import ar.com.dgarcia.objectmapper.api.ensemble.disassembly.DisassemblyTransformer;
+import ar.com.dgarcia.objectmapper.impl.ensemble.FieldDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.cache.WeakMapCache;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.ArrayDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.CollectionDisassembler;
@@ -10,6 +12,7 @@ import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.MapDis
 import ar.com.dgarcia.objectmapper.impl.ensemble.transformers.NoChange;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -19,20 +22,22 @@ import java.util.function.Function;
  */
 public class DisassembledValueTransformer implements DisassemblyTransformer {
 
-    private WeakCache<Class<?>, Function<Object, Object>> transformerPerType;
+    private Cache<Class<?>, Function<Object, Object>> transformerPerType;
+    private Map<Class<?>, Function<Object,Object>> customPerType;
 
     private ArrayDisassembler arrayDisassembler;
     private CollectionDisassembler collectionDisassembler;
     private MapDisassembler mapDisassembler;
     private ObjectDisassembler objectDisassembler;
 
-    public static DisassembledValueTransformer create(ObjectDisassembler disassembler) {
+    public static DisassembledValueTransformer create() {
         DisassembledValueTransformer transformer = new DisassembledValueTransformer();
         transformer.transformerPerType = WeakMapCache.create();
         transformer.arrayDisassembler = ArrayDisassembler.create(transformer);
         transformer.collectionDisassembler = CollectionDisassembler.create(transformer);
         transformer.mapDisassembler = MapDisassembler.create(transformer);
-        transformer.objectDisassembler = disassembler;
+        transformer.objectDisassembler = FieldDisassembler.create(transformer);
+        transformer.customPerType = new HashMap<>();
         return transformer;
     }
 
@@ -48,7 +53,16 @@ public class DisassembledValueTransformer implements DisassemblyTransformer {
     }
 
     public Function<Object, Object> getTransformerFor(Class<?> valueType) {
+        Function<Object, Object> customDefined = customPerType.get(valueType);
+        if(customDefined != null){
+            return customDefined;
+        }
         return transformerPerType.getOrCreateFor(valueType, ()-> defineTransformerFor(valueType));
+    }
+
+    @Override
+    public <T> void addTransformerFor(Class<T> typicalObjectClass, Function<? super T, ?> customTransformer) {
+        customPerType.put(typicalObjectClass, (Function<Object, Object>) customTransformer);
     }
 
     private Function<Object, Object> defineTransformerFor(Class<?> valueType) {
@@ -70,6 +84,18 @@ public class DisassembledValueTransformer implements DisassemblyTransformer {
         if(Map.class.isAssignableFrom(valueType)){
             return mapDisassembler;
         }
+        return getObjectDisassembler();
+    }
+
+    public ObjectDisassembler getObjectDisassembler() {
+        if(objectDisassembler == null){
+            // Sanity check
+            throw new MapperException("Object disassembler was not defined for this transformer");
+        }
         return objectDisassembler;
+    }
+
+    public void setObjectDisassembler(ObjectDisassembler objectDisassembler) {
+        this.objectDisassembler = objectDisassembler;
     }
 }
