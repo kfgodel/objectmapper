@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * This type represents teh functional adapter of teh object assembler
+ * This type represents the functional adapter of the object assembler.
+ * As the expected type is needed as extra parameter the ObjectAssembler cannot be used as a Function
  * Created by kfgodel on 21/11/14.
  */
 public class ObjectAssemblerAdapter implements Function<Object, Object> {

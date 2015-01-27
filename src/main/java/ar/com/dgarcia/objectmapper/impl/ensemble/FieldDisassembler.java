@@ -46,17 +46,11 @@ public class FieldDisassembler implements ObjectDisassembler {
         return map;
     }
 
-    @Override
     public DisassemblyTransformer getDisassemblyTransformer() {
         if(valueTransformer == null){
             throw new MapperException("A value transformer was not defined for this field disassembler");
         }
         return valueTransformer;
-    }
-
-    @Override
-    public void setDisassemblyTransformer(DisassemblyTransformer transformer) {
-        this.valueTransformer = transformer;
     }
 
     /**
@@ -93,18 +87,11 @@ public class FieldDisassembler implements ObjectDisassembler {
         return GetAndTransformInstruction.create(getterInstruction, disassemblyTransformer);
     }
 
-    public static FieldDisassembler create() {
+    public static FieldDisassembler create(DisassemblyTransformer valueTransformer) {
         FieldDisassembler disassembler = new FieldDisassembler();
         disassembler.planPerType = WeakMapCache.create();
+        disassembler.valueTransformer = valueTransformer;
         return disassembler;
     }
-
-    public static FieldDisassembler create(DisassemblyTransformer valueTransformer) {
-        FieldDisassembler disassembler = create();
-        disassembler.setDisassemblyTransformer(valueTransformer);
-        valueTransformer.setObjectDisassembler(disassembler);
-        return disassembler;
-    }
-
 
 }

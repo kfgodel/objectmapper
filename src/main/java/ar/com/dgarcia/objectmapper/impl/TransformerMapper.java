@@ -4,8 +4,6 @@ import ar.com.dgarcia.objectmapper.api.MapperException;
 import ar.com.dgarcia.objectmapper.api.TypeMapper;
 import ar.com.dgarcia.objectmapper.api.ensemble.assembly.AssemblyTransformer;
 import ar.com.dgarcia.objectmapper.api.ensemble.disassembly.DisassemblyTransformer;
-import ar.com.dgarcia.objectmapper.impl.ensemble.FieldAssembler;
-import ar.com.dgarcia.objectmapper.impl.ensemble.FieldDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.AssembledValueTransformer;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.DisassembledValueTransformer;
 import ar.com.kfgodel.diamond.api.Diamond;
@@ -63,8 +61,8 @@ public class TransformerMapper implements TypeMapper {
 
     public static TransformerMapper create() {
         TransformerMapper mapper = new TransformerMapper();
-        mapper.assemblyTransformer = AssembledValueTransformer.create(FieldAssembler.create());
-        mapper.disassemblyTransformer = DisassembledValueTransformer.create(FieldDisassembler.create());
+        mapper.assemblyTransformer = AssembledValueTransformer.create();
+        mapper.disassemblyTransformer = DisassembledValueTransformer.create();
         return mapper;
     }
 

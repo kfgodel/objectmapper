@@ -3,6 +3,7 @@ package ar.com.dgarcia.objectmapper.impl.ensemble.assembly;
 import ar.com.dgarcia.objectmapper.api.ensemble.ObjectAssembler;
 import ar.com.dgarcia.objectmapper.api.ensemble.assembly.AssemblyTransformer;
 import ar.com.dgarcia.objectmapper.api.ensemble.cache.Cache;
+import ar.com.dgarcia.objectmapper.impl.ensemble.FieldAssembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.transformers.ArrayAssembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.transformers.CollectionAssembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.transformers.MapAssembler;
@@ -32,16 +33,9 @@ public class AssembledValueTransformer implements AssemblyTransformer {
         AssembledValueTransformer transformer = new AssembledValueTransformer();
         transformer.transformerPerType = WeakMapCache.create();
         transformer.customPerType = new HashMap<>();
+        transformer.objectAssembler = FieldAssembler.create(transformer);
         return transformer;
     }
-
-    public static AssembledValueTransformer create(ObjectAssembler assembler) {
-        AssembledValueTransformer transformer = create();
-        transformer.setObjectAssembler(assembler);
-        assembler.setAssemblyTransformer(transformer);
-        return transformer;
-    }
-
 
     @Override
     public Object transform(Object value, TypeInstance expectedType) {
@@ -56,11 +50,6 @@ public class AssembledValueTransformer implements AssemblyTransformer {
     @Override
     public <T> void addTransformerFor(Class<T> typicalObjectClass, Function<?, ? extends T> customTransformer) {
         customPerType.put(Diamond.of(typicalObjectClass), (Function<Object, Object>) customTransformer);
-    }
-
-    @Override
-    public void setObjectAssembler(ObjectAssembler assembler) {
-        this.objectAssembler = assembler;
     }
 
     public Function<Object, Object> getTransformerFor(TypeInstance valueType) {

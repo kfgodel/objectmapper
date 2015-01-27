@@ -1,6 +1,5 @@
 package ar.com.dgarcia.objectmapper.api.ensemble.assembly;
 
-import ar.com.dgarcia.objectmapper.api.ensemble.ObjectAssembler;
 import ar.com.kfgodel.diamond.api.types.TypeInstance;
 
 import java.util.function.Function;
@@ -32,6 +31,4 @@ public interface AssemblyTransformer {
      */
     <T> void addTransformerFor(Class<T> typicalObjectClass, Function<?, ? extends T> customTransformer);
     
-    void setObjectAssembler(ObjectAssembler assembler);
-
 }

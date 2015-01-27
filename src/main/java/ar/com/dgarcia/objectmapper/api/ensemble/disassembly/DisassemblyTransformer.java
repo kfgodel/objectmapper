@@ -1,7 +1,5 @@
 package ar.com.dgarcia.objectmapper.api.ensemble.disassembly;
 
-import ar.com.dgarcia.objectmapper.api.ensemble.ObjectDisassembler;
-
 import java.util.function.Function;
 
 /**
@@ -29,5 +27,4 @@ public interface DisassemblyTransformer {
      */
     <T> void addTransformerFor(Class<T> typicalObjectClass, Function<? super T, ?> customTransformer);
 
-    void setObjectDisassembler(ObjectDisassembler objectDisassembler);
 }

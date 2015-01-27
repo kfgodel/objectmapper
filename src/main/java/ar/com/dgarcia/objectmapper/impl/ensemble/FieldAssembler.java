@@ -46,11 +46,6 @@ public class FieldAssembler implements ObjectAssembler {
         return createdInstance;
     }
 
-    @Override
-    public void setAssemblyTransformer(AssemblyTransformer transformer) {
-        this.valueTransformer = transformer;
-    }
-
     private <T> AssemblyPlan getPlanFor(TypeInstance expectedType) {
         return planPerType.getOrCreateFor(expectedType, ()-> createPlanFor(expectedType));
     }
@@ -75,19 +70,12 @@ public class FieldAssembler implements ObjectAssembler {
         return TransformAndSetInstruction.create(setterInstruction, assemblyTransformer);
     }
 
-    public static FieldAssembler create() {
+    public static FieldAssembler create(AssemblyTransformer assemblyTransformer) {
         FieldAssembler assembler = new FieldAssembler();
         assembler.planPerType = WeakMapCache.create();
+        assembler.valueTransformer = assemblyTransformer;
         return assembler;
     }
-
-    public static FieldAssembler create(AssemblyTransformer assemblyTransformer) {
-        FieldAssembler assembler = create();
-        assembler.setAssemblyTransformer(assemblyTransformer);
-        assemblyTransformer.setObjectAssembler(assembler);
-        return assembler;
-    }
-
 
     public AssemblyTransformer getValueTransformer() {
         if(valueTransformer == null){

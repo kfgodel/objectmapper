@@ -4,6 +4,7 @@ import ar.com.dgarcia.objectmapper.api.MapperException;
 import ar.com.dgarcia.objectmapper.api.ensemble.ObjectDisassembler;
 import ar.com.dgarcia.objectmapper.api.ensemble.cache.Cache;
 import ar.com.dgarcia.objectmapper.api.ensemble.disassembly.DisassemblyTransformer;
+import ar.com.dgarcia.objectmapper.impl.ensemble.FieldDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.cache.WeakMapCache;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.ArrayDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.CollectionDisassembler;
@@ -35,17 +36,10 @@ public class DisassembledValueTransformer implements DisassemblyTransformer {
         transformer.arrayDisassembler = ArrayDisassembler.create(transformer);
         transformer.collectionDisassembler = CollectionDisassembler.create(transformer);
         transformer.mapDisassembler = MapDisassembler.create(transformer);
+        transformer.objectDisassembler = FieldDisassembler.create(transformer);
         transformer.customPerType = new HashMap<>();
         return transformer;
     }
-
-    public static DisassembledValueTransformer create(ObjectDisassembler objectDisassembler) {
-        DisassembledValueTransformer transformer = create();
-        transformer.setObjectDisassembler(objectDisassembler);
-        objectDisassembler.setDisassemblyTransformer(transformer);
-        return transformer;
-    }
-
 
     @Override
     public Object transform(Object value) {
