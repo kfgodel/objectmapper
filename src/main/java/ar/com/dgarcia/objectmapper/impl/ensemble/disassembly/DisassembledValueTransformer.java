@@ -10,6 +10,9 @@ import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.Collec
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.EnumDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.transformers.MapDisassembler;
 import ar.com.dgarcia.objectmapper.impl.ensemble.transformers.NoChange;
+import ar.com.kfgodel.diamond.api.Diamond;
+import ar.com.kfgodel.diamond.api.types.TypeInstance;
+import ar.com.kfgodel.diamond.api.types.kinds.Kinds;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,8 +25,8 @@ import java.util.function.Function;
  */
 public class DisassembledValueTransformer implements DisassemblyTransformer {
 
-    private Cache<Class<?>, Function<Object, Object>> transformerPerType;
-    private Map<Class<?>, Function<Object,Object>> customPerType;
+    private Cache<TypeInstance, Function<Object, Object>> transformerPerType;
+    private Map<TypeInstance, Function<Object,Object>> customPerType;
 
     private ArrayDisassembler arrayDisassembler;
     private CollectionDisassembler collectionDisassembler;
@@ -48,13 +51,13 @@ public class DisassembledValueTransformer implements DisassemblyTransformer {
         if(value == null){
             return null;
         }
-        Class<?> valueType = value.getClass();
+        TypeInstance valueType = Diamond.of(value.getClass());
         Function<Object, Object> typeTransformer = getTransformerFor(valueType);
         Object transformedValue = typeTransformer.apply(value);
         return transformedValue;
     }
 
-    public Function<Object, Object> getTransformerFor(Class<?> valueType) {
+    public Function<Object, Object> getTransformerFor(TypeInstance valueType) {
         Function<Object, Object> customDefined = customPerType.get(valueType);
         if(customDefined != null){
             return customDefined;
@@ -63,30 +66,24 @@ public class DisassembledValueTransformer implements DisassemblyTransformer {
     }
 
     @Override
-    public <T> void addTransformerFor(Class<T> typicalObjectClass, Function<? super T, ?> customTransformer) {
-        customPerType.put(typicalObjectClass, (Function<Object, Object>) customTransformer);
+    public <T> void addTransformerFor(TypeInstance customType, Function<? super T, ?> customTransformer) {
+        customPerType.put(customType, (Function<Object, Object>) customTransformer);
     }
 
-    private Function<Object, Object> defineTransformerFor(Class<?> valueType) {
-        if(valueType.isPrimitive()){
+    private Function<Object, Object> defineTransformerFor(TypeInstance valueType) {
+        if(valueType.is(Kinds.VALUE)){
             return NoChange.INSTANCE;
         }
-        if(Number.class.isAssignableFrom(valueType)){
-            return NoChange.INSTANCE;
-        }
-        if(CharSequence.class.isAssignableFrom(valueType)){
-            return NoChange.INSTANCE;
-        }
-        if(Enum.class.isAssignableFrom(valueType)){
+        if(valueType.is(Kinds.ENUM)){
             return enumDisassembler;
         }
-        if(valueType.getComponentType() != null){
+        if(valueType.is(Kinds.ARRAY)){
             return arrayDisassembler;
         }
-        if(Collection.class.isAssignableFrom(valueType)){
+        if(valueType.isAssignableTo(Diamond.of(Collection.class))){
             return collectionDisassembler;
         }
-        if(Map.class.isAssignableFrom(valueType)){
+        if(valueType.isAssignableTo(Diamond.of(Map.class))){
             return mapDisassembler;
         }
         return getObjectDisassembler();

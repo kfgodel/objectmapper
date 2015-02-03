@@ -7,6 +7,7 @@ import ar.com.dgarcia.objectmapper.api.ensemble.disassembly.DisassemblyTransform
 import ar.com.dgarcia.objectmapper.impl.ensemble.assembly.AssembledValueTransformer;
 import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.DisassembledValueTransformer;
 import ar.com.kfgodel.diamond.api.Diamond;
+import ar.com.kfgodel.diamond.api.types.TypeInstance;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -26,14 +27,14 @@ public class TransformerMapper implements TypeMapper {
         if(instance == null){
             return null;
         }
-        Class<?> sourceType = instance.getClass();
+        TypeInstance sourceType = Diamond.of(instance.getClass());
         Function<Object, Object> disassembler = disassemblyTransformer.getTransformerFor(sourceType);
-        Object dissasembled = disassembler.apply(instance);
+        Object disassembled = disassembler.apply(instance);
         Map<String, Object> asMap = null;
         try {
-            asMap = (Map<String, Object>) dissasembled;
+            asMap = (Map<String, Object>) disassembled;
         } catch (Exception e) {
-            throw new MapperException("Expected a Map disassembly of["+sourceType+"] but got["+dissasembled+"]. Using transformer ["+disassembler+"]");
+            throw new MapperException("Expected a Map disassembly of["+sourceType+"] but got["+disassembled+"]. Using transformer ["+disassembler+"]");
         }
         return asMap;
     }
