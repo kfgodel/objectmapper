@@ -13,6 +13,7 @@ import ar.com.dgarcia.objectmapper.impl.ensemble.disassembly.instructions.GetAnd
 import ar.com.dgarcia.objectmapper.impl.ensemble.transformers.NoChange;
 import ar.com.kfgodel.diamond.api.Diamond;
 import ar.com.kfgodel.diamond.api.fields.TypeField;
+import ar.com.kfgodel.diamond.api.types.TypeInstance;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -76,8 +77,8 @@ public class FieldDisassembler implements ObjectDisassembler {
     }
 
     private DisassemblyInstruction createInstructionFor(TypeField instanceField) {
-        Class<?> valueType = instanceField.type().nativeTypes().get();
-        Function<Object, Object> disassemblyTransformer = getDisassemblyTransformer().getTransformerFor(valueType);
+        TypeInstance fieldType = instanceField.type();
+        Function<Object, Object> disassemblyTransformer = getDisassemblyTransformer().getTransformerFor(fieldType);
 
         FieldGetterInstruction getterInstruction = FieldGetterInstruction.create(instanceField);
         if(disassemblyTransformer == NoChange.INSTANCE){

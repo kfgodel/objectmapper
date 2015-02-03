@@ -29,6 +29,6 @@ public interface AssemblyTransformer {
      * @param typicalObjectClass The type that needs a custom transformer
      * @param customTransformer The function to use for that type when assembling
      */
-    <T> void addTransformerFor(Class<T> typicalObjectClass, Function<?, ? extends T> customTransformer);
+    <T> void addTransformerFor(TypeInstance typicalObjectClass, Function<?, ? extends T> customTransformer);
     
 }

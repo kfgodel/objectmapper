@@ -9,6 +9,7 @@ import ar.com.dgarcia.objectmapper.impl.ensemble.cache.WeakMapCache;
 import ar.com.dgarcia.objectmapper.impl.ensemble.transformers.NoChange;
 import ar.com.kfgodel.diamond.api.Diamond;
 import ar.com.kfgodel.diamond.api.types.TypeInstance;
+import ar.com.kfgodel.diamond.api.types.kinds.Kinds;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,8 +46,8 @@ public class AssembledValueTransformer implements AssemblyTransformer {
     }
 
     @Override
-    public <T> void addTransformerFor(Class<T> typicalObjectClass, Function<?, ? extends T> customTransformer) {
-        customPerType.put(Diamond.of(typicalObjectClass), (Function<Object, Object>) customTransformer);
+    public <T> void addTransformerFor(TypeInstance typicalObjectClass, Function<?, ? extends T> customTransformer) {
+        customPerType.put(typicalObjectClass, (Function<Object, Object>) customTransformer);
     }
 
     public Function<Object, Object> getTransformerFor(TypeInstance valueType) {
@@ -58,27 +59,19 @@ public class AssembledValueTransformer implements AssemblyTransformer {
     }
 
     private Function<Object, Object> defineTransformerFor(TypeInstance expectedType) {
-        Class<?> nativeType = expectedType.nativeTypes().get();
-        if(nativeType.isPrimitive()){
+        if(expectedType.is(Kinds.VALUE)){
             return NoChange.INSTANCE;
         }
-        if(Number.class.isAssignableFrom(nativeType)){
-            return NoChange.INSTANCE;
+        if(expectedType.is(Kinds.ENUM)){
+            return EnumAssembler.create((Class<? extends Enum>) expectedType.nativeTypes().get());
         }
-        if(CharSequence.class.isAssignableFrom(nativeType)){
-            return NoChange.INSTANCE;
-        }
-        if(Enum.class.isAssignableFrom(nativeType)){
-            return EnumAssembler.create((Class<? extends Enum>) nativeType);
-        }
-        Class<?> arrayComponentType = nativeType.getComponentType();
-        if(arrayComponentType != null){
+        if(expectedType.is(Kinds.ARRAY)){
             return ArrayAssembler.create(this, expectedType);
         }
-        if(Collection.class.isAssignableFrom(nativeType)){
+        if(expectedType.isAssignableTo(Diamond.of(Collection.class))){
             return CollectionAssembler.create(this, expectedType);
         }
-        if(Map.class.isAssignableFrom(nativeType)){
+        if(expectedType.isAssignableTo(Diamond.of(Map.class))){
             return MapAssembler.create(this, expectedType);
         }
         return ObjectAssemblerAdapter.create(objectAssembler, expectedType);
